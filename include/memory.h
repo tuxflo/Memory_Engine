@@ -13,6 +13,7 @@ public:
     Memory();
     bool set_folder_path(std::string folder_path);
     bool set_number_of_cards(int rows, int columns);
+    void set_cards();
 
     bool add_player(std::string name);
     bool remove_player(std::string name);
@@ -25,8 +26,12 @@ public:
 protected:
 
 private:
+    //File handeling
+    int get_num_files(std::string folder_path, std::string file_extension);
     //Maximum number of cards in given directory
     int _num_cards;
+    int _rows;
+    int _columns;
 };
 
 #endif // MEMORY_H
