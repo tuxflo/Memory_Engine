@@ -13,6 +13,7 @@ public:
     //Set up the game
     virtual bool set_folder_path(std::string folder_path)=0;
     virtual bool set_number_of_cards(int rows, int columns)=0;
+    virtual void set_cards()=0;
 
     //Players stuff
     virtual bool add_player(std::string name)=0;
