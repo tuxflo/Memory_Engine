@@ -1,8 +1,14 @@
 #include "include/memory.h"
 
-Memory::Memory():
-    _num_cards(0)
+Memory::Memory() :
+    _num_cards(0),
+    _first_card_state(this),
+    _second_card_state(this),
+    _end_turn_state(this),
+    _game_over_state(this)
 {
+    _state = &_first_card_state;
+
 }
 
 bool Memory::set_folder_path(std::string folder_path)
@@ -79,6 +85,11 @@ bool Memory::set_number_of_cards(int rows, int columns)
 
     //Just for debugging
     std::cerr << "Number of cards choosen by player: " << _rows * _columns << std::endl;
+
+    //Set up the 2D Card array
+    _cards = new Card**[_rows];
+    for(int i=0; i<_rows; i++)
+        _cards[i] = new Card*[_columns];
     return true;
 }
 
@@ -86,7 +97,7 @@ void Memory::set_cards()
 {
     int count = _rows*_columns;
     //Array for the filenames numbers (Randomly from 1- number of cards/2)
-    int *filenames = _unique_numbers(count/2, 1, _num_cards);
+    int *filenames = _unique_numbers(count/2, _num_cards);
 
     std::stringstream directory_name;
     std::string *cards_array = new std::string [count];
@@ -106,6 +117,18 @@ void Memory::set_cards()
     }
     cards_array = _shuffle_array(cards_array, count);
 
+    tmp=0;
+    for(int r=0; r<_rows; r++)
+    {
+        for(int c=0; c<_columns; c++)
+        {
+            if(tmp == count/2)
+                tmp = 0;
+            _cards[r][c] = new Card(cards_array[tmp], filenames[tmp]);
+            std::cerr << "Name: " << _cards[r][c]->get_filename() << " ID: " << _cards[r][c]->get_ID() <<  " Turned " << _cards[r][c]->get_turned() <<  std::endl;
+            tmp++;
+        }
+    }
     delete [] filenames;
     delete [] cards_array;
 }
@@ -113,7 +136,8 @@ void Memory::set_cards()
 bool Memory::add_player(std::string name)
 {
     _players.push_back(Player(name));
-    std::cerr << "Added Player: " << name << std::endl;
+    std::cerr << "Added player: " << name << std::endl;
+    _active_player = &_players.front();
     return true;
 }
 
@@ -121,19 +145,19 @@ bool Memory::remove_player(std::string name)
 {
     if(_players.empty())
     {
-        std::cerr << "Could not remove Player because Player list is empty" << std::endl;
+        std::cerr << "Could not remove player because playerlist is empty" << std::endl;
         return false;
     }
     for(std::vector<Player>::iterator it = _players.begin(); it != _players.end(); ++it)
     {
         if(!name.compare(it->get_name()))
         {
-            std::cerr << "Removed Player: " << it->get_name() << std::endl;
+            std::cerr << "Removed player: " << it->get_name() << std::endl;
             _players.erase(it);
             return true;
         }
     }
-    std::cerr << "Could not find Player " << name << std::endl;
+    std::cerr << "Could not find player " << name << std::endl;
     return false;
 }
 
@@ -142,28 +166,27 @@ bool Memory::remove_player(int index)
 
     if(_players.empty())
     {
-        std::cerr << "Could not remove Player because Player list is empty" << std::endl;
+        std::cerr << "Could not remove player because playerlist is empty" << std::endl;
         return false;
     }
-    std::cerr << "Removed Player: " << _players.at(index).get_name() << std::endl;
+    std::cerr << "Removed player: " << _players.at(index).get_name() << std::endl;
     _players.erase(_players.begin()+index);
     return true;
 }
 
-std::vector<std::string> Memory::list_players()
-{
-}
-
 int Memory::get_player_score(int index)
 {
+    return _players.at(index).get_score();
 }
 
 std::string Memory::get_player_name(int index)
 {
+    return _players.at(index).get_name();
 }
 
 void Memory::turn(int row, int column)
 {
+    _state->turn(row, column);
 }
 
 int Memory::_get_num_files(std::string folder_path, std::string file_extension)
@@ -194,11 +217,10 @@ int Memory::_get_num_files(std::string folder_path, std::string file_extension)
     return tmp;
 }
 
-int *Memory::_unique_numbers(int array_size, int min, int max)
+int *Memory::_unique_numbers(int array_size, int max)
 {
     //Set time for randomizing
     srand((unsigned)time(0));
-    int range = (max-min)+1;
     int number;
     int *array = new int [array_size];
     for(int c=0; c< array_size; c++)

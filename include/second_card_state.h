@@ -6,7 +6,8 @@
 class Second_Card_State : public Memory_State
 {
 public:
-    Second_Card_State();
+    Second_Card_State(Memory *memory);
+    void turn(int row, int column);
 };
 
 #endif // SECOND_CARD_STATE_H
