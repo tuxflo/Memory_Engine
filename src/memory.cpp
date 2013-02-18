@@ -75,6 +75,8 @@ bool Memory::set_number_of_cards(int rows, int columns)
     //Return true if number of cards is equal or less then files in the folder
     _rows = rows;
     _columns = columns;
+
+    _unique_numbers(rows*columns, 1, _num_cards);
     return true;
 }
 
@@ -149,4 +151,21 @@ int Memory::get_num_files(std::string folder_path, std::string file_extension)
         std::cerr << "Error: Folder " << folder_path << " is empty!" << std::endl;
     }
     return tmp;
+}
+
+std::vector<int> *Memory::_unique_numbers(int array_size, int min, int max)
+{
+    srand(0);
+    int range = (max-min)+1;
+    int number;
+    std::vector<int> array;
+    for(int i=0; i< array_size; i++)
+    {
+        do{
+
+            number = min+int(range*rand()/(RAND_MAX + 1.0));
+
+        }while(std::find(array.begin(), array.end(), number)== array.end());
+        array.at(i) = number;
+    }
 }

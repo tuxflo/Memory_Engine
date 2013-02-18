@@ -2,6 +2,9 @@
 #define MEMORY_H
 #include <dirent.h>
 #include <iostream>
+#include <time.h>
+#include <stdlib.h>
+#include <algorithm>
 
 #include "include/i_memory.h"
 
@@ -28,6 +31,8 @@ protected:
 private:
     //File handeling
     int get_num_files(std::string folder_path, std::string file_extension);
+    //Generate unique random numbers
+    std::vector<int> *_unique_numbers(int array_size, int min, int max);
     //Maximum number of cards in given directory
     int _num_cards;
     int _rows;
