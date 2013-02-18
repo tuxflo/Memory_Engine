@@ -11,10 +11,10 @@ bool Memory::set_folder_path(std::string folder_path)
     struct dirent *ent;
     std::string file;
     bool cover; //For checking if a cover file exists
-    std::string extension = folder_path.substr(folder_path.length()-3);
+    _filename_extension = folder_path.substr(folder_path.length()-3);
     std::string cover_string = "cover";
     cover_string.append(".");
-    cover_string.append(extension);
+    cover_string.append(_filename_extension);
     //First check if cover file exists
     if ((dir = opendir (folder_path.c_str())) == NULL)
     {
@@ -34,17 +34,17 @@ bool Memory::set_folder_path(std::string folder_path)
         return false;
     }
 
+    _folder_path = folder_path;
+
     //Check the subfolders
     folder_path.append("/1");
-    int first = get_num_files(folder_path, extension);
-    int first = _get_num_files(folder_path, extension);
+    int first = _get_num_files(folder_path, _filename_extension);
     if(!first)
     {
         return false;
     }
     folder_path.replace(folder_path.length()-1, 1, "2");
-    int second = get_num_files(folder_path, extension);
-    int second = _get_num_files(folder_path, extension);
+    int second = _get_num_files(folder_path, _filename_extension);
     if(!second)
     {
         return false;
@@ -55,9 +55,7 @@ bool Memory::set_folder_path(std::string folder_path)
         _num_cards = first;
 
     //Just for debugging
-    std::cerr << "Number of cards: " <<_num_cards << std::endl;
-
-    set_cards();
+    std::cerr << "Number of cards in Folder " << _folder_path << " : " << _num_cards << std::endl;
     return true;
 }
 
@@ -79,53 +77,37 @@ bool Memory::set_number_of_cards(int rows, int columns)
     _rows = rows;
     _columns = columns;
 
-    _unique_numbers(rows*columns, 1, _num_cards);
+    //Just for debugging
+    std::cerr << "Number of cards choosen by player: " << _rows * _columns << std::endl;
     return true;
 }
 
 void Memory::set_cards()
 {
-    //use _num_cards array for randomizing the cards
-    int *cards = new int[_num_cards];
+    int count = _rows*_columns;
+    //Array for the filenames numbers (Randomly from 1- number of cards/2)
+    int *filenames = _unique_numbers(count/2, 1, _num_cards);
+
     std::stringstream directory_name;
-    std::string *array = new std::string [_num_cards];
-    std::string *_cards_array = new std::string [_rows*_columns];
-    int tmp = 1;
-    //Fill the array in the right order
-    for(int i=0; i< _num_cards; i++)
+    std::string *cards_array = new std::string [count];
+    for(int i=0; i<count/2; i++)
     {
-        if(i == _num_cards/2)
-            tmp = 1;
-
-        cards[i] = tmp;
+        directory_name << _folder_path << "/1/" << filenames[i] << "." << _filename_extension;
+        cards_array[i] = directory_name.str();
+        directory_name.str("");
     }
-
-
-        directory_name << tmp;
-        array[i] = directory_name.str();
+    int tmp=0;
+    for(int j=count/2; j<count; j++)
+    {
+        directory_name << _folder_path << "/2/" << filenames[tmp] << "." << _filename_extension;
+        cards_array[j] = directory_name.str();
         directory_name.str("");
         tmp++;
     }
-    array = _shuffle_array(array, _num_cards);
-    for(int j=0; j< (_rows*_columns)/2; j++)
-    {
-        _cards_array[j] = array[j];
-    }
-    int bla=0;
-    for(int k=(_rows*_columns)/2; k<_rows*_columns; k++)
-    {
+    cards_array = _shuffle_array(cards_array, count);
 
-        _cards_array[k] = array[bla];
-        bla++;
-    }
-
-    _cards_array = _shuffle_array(_cards_array, _rows*_columns);
-
-    for(int l=0; l<_rows*_columns; l++)
-    {
-        std::cerr << _cards_array[l] << std::endl;
-    }
->>>>>>> Sample_files
+    delete [] filenames;
+    delete [] cards_array;
 }
 
 bool Memory::add_player(std::string name)
@@ -184,26 +166,39 @@ int Memory::_get_num_files(std::string folder_path, std::string file_extension)
     return tmp;
 }
 
-std::vector<int> *Memory::_unique_numbers(int array_size, int min, int max)
-{
-    srand(0);
-    int range = (max-min)+1;
-    int number;
-    std::vector<int> array;
-    for(int i=0; i< array_size; i++)
-    {
-        do{
-
-            number = min+int(range*rand()/(RAND_MAX + 1.0));
-
-        }while(std::find(array.begin(), array.end(), number)== array.end());
-        array.at(i) = number;
-    }
-std::string *Memory::_shuffle_array(std::string *array, int array_size)
+int *Memory::_unique_numbers(int array_size, int min, int max)
 {
     //Set time for randomizing
     srand((unsigned)time(0));
+    int range = (max-min)+1;
+    int number;
+    int *array = new int [array_size];
+    for(int c=0; c< array_size; c++)
+        array[c] = 0;
 
+    for(int i=0; i< array_size; i++)
+    {
+        do{
+            number = (rand()% max) +1;
+        }
+        while(_check_number(array, array_size, number));
+        array[i] = number;
+    }
+    return array;
+}
+
+bool Memory::_check_number(int *array, int array_size, int number)
+{
+    //Returns false if the number is not in the array
+    for(int i=0; i < array_size; i++)
+    {
+        if(array[i] == number)
+            return true;
+    }
+    return false;
+}
+std::string *Memory::_shuffle_array(std::string *array, int array_size)
+{
     for(int i=0;i<array_size-1; i++)
     {
         int c = i +(rand() % (array_size-i));

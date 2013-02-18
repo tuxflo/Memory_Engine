@@ -32,7 +32,12 @@ protected:
 private:
     //File handeling
     int get_num_files(std::string folder_path, std::string file_extension);
-    std::vector<int> *_unique_numbers(int array_size, int min, int max);
+    std::string _folder_path;
+    std::string _filename_extension;
+    //For generating unique random numbers if specific range
+    int *_unique_numbers(int array_size, int min, int max);
+    bool _check_number(int *array, int array_size, int number);
+
     int _get_num_files(std::string folder_path, std::string file_extension);
     std::string *_shuffle_array(std::string *array, int array_size);
     //Maximum number of cards in given directory
