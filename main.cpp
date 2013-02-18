@@ -18,6 +18,7 @@ int main()
         cerr << "Error while setting number of cards!" << endl;
         return -1;
     }
+    game->set_cards();
 
     return 0;
 }

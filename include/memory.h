@@ -5,6 +5,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <sstream>
 
 #include "include/i_memory.h"
 
@@ -31,8 +32,9 @@ protected:
 private:
     //File handeling
     int get_num_files(std::string folder_path, std::string file_extension);
-    //Generate unique random numbers
     std::vector<int> *_unique_numbers(int array_size, int min, int max);
+    int _get_num_files(std::string folder_path, std::string file_extension);
+    std::string *_shuffle_array(std::string *array, int array_size);
     //Maximum number of cards in given directory
     int _num_cards;
     int _rows;

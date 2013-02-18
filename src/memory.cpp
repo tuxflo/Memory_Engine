@@ -7,7 +7,6 @@ Memory::Memory():
 
 bool Memory::set_folder_path(std::string folder_path)
 {
-    //Return false if given folder does not exist or is not readable
     DIR *dir;
     struct dirent *ent;
     std::string file;
@@ -38,12 +37,14 @@ bool Memory::set_folder_path(std::string folder_path)
     //Check the subfolders
     folder_path.append("/1");
     int first = get_num_files(folder_path, extension);
+    int first = _get_num_files(folder_path, extension);
     if(!first)
     {
         return false;
     }
     folder_path.replace(folder_path.length()-1, 1, "2");
     int second = get_num_files(folder_path, extension);
+    int second = _get_num_files(folder_path, extension);
     if(!second)
     {
         return false;
@@ -55,6 +56,8 @@ bool Memory::set_folder_path(std::string folder_path)
 
     //Just for debugging
     std::cerr << "Number of cards: " <<_num_cards << std::endl;
+
+    set_cards();
     return true;
 }
 
@@ -84,6 +87,9 @@ void Memory::set_cards()
 {
     //use _num_cards array for randomizing the cards
     int *cards = new int[_num_cards];
+    std::stringstream directory_name;
+    std::string *array = new std::string [_num_cards];
+    std::string *_cards_array = new std::string [_rows*_columns];
     int tmp = 1;
     //Fill the array in the right order
     for(int i=0; i< _num_cards; i++)
@@ -95,6 +101,31 @@ void Memory::set_cards()
     }
 
 
+        directory_name << tmp;
+        array[i] = directory_name.str();
+        directory_name.str("");
+        tmp++;
+    }
+    array = _shuffle_array(array, _num_cards);
+    for(int j=0; j< (_rows*_columns)/2; j++)
+    {
+        _cards_array[j] = array[j];
+    }
+    int bla=0;
+    for(int k=(_rows*_columns)/2; k<_rows*_columns; k++)
+    {
+
+        _cards_array[k] = array[bla];
+        bla++;
+    }
+
+    _cards_array = _shuffle_array(_cards_array, _rows*_columns);
+
+    for(int l=0; l<_rows*_columns; l++)
+    {
+        std::cerr << _cards_array[l] << std::endl;
+    }
+>>>>>>> Sample_files
 }
 
 bool Memory::add_player(std::string name)
@@ -125,7 +156,7 @@ void Memory::turn(int row, int column)
 {
 }
 
-int Memory::get_num_files(std::string folder_path, std::string file_extension)
+int Memory::_get_num_files(std::string folder_path, std::string file_extension)
 {
     DIR *dir;
     struct dirent *ent;
@@ -168,4 +199,18 @@ std::vector<int> *Memory::_unique_numbers(int array_size, int min, int max)
         }while(std::find(array.begin(), array.end(), number)== array.end());
         array.at(i) = number;
     }
+std::string *Memory::_shuffle_array(std::string *array, int array_size)
+{
+    //Set time for randomizing
+    srand((unsigned)time(0));
+
+    for(int i=0;i<array_size-1; i++)
+    {
+        int c = i +(rand() % (array_size-i));
+        //Swap values
+        std::string tmp = array[i];
+        array[i] = array[c];
+        array[c] = tmp;
+    }
+    return array;
 }
