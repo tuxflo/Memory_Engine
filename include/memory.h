@@ -27,10 +27,14 @@ public:
     std::string get_player_name(int index);
 
     void turn(int row, int column);
+
+
+    //Debugging
+    void view_cards();
 protected:
 
 private:
-    //File handeling
+    //File handeling maybe put this stuff in a shared lib?
     int get_num_files(std::string folder_path, std::string file_extension);
     std::string _folder_path;
     std::string _filename_extension;
