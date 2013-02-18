@@ -1,5 +1,9 @@
 #include "include/i_memory.h"
 
-I_Memory::I_Memory()
+void I_Memory::set_view(Memory_View *view)
 {
+    _view = view;
 }
+
+
+

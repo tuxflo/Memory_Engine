@@ -45,13 +45,10 @@ void End_Turn_State::turn(int row, int column)
                 //Check if active player is the last in the vector
                 if(!it->get_name().compare(_memory->_players.back().get_name()))
                     _memory->_active_player = &_memory->_players.front();
-                else
+                if(!it->get_name().compare(_memory->_active_player->get_name()))
                 {
-                    if(!it->get_name().compare(_memory->_active_player->get_name()))
-                    {
-                        _memory->_active_player = &*it+1;
-                        break;
-                    }
+                    _memory->_active_player = &*it+1;
+                    break;
                 }
             }
         }

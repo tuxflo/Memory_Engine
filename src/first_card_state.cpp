@@ -9,8 +9,8 @@ First_Card_State::First_Card_State(Memory *memory) :
 
 void First_Card_State::turn(int row, int column)
 {
-    std::cerr << "In First_Card_state" << std::endl;
     std::cerr << "Active Player: " << _memory->_active_player->get_name() << std::endl;
+    std::cerr << "In First_Card_state" << std::endl;
 
     //This is the first card
     if(_memory->_cards[row][column]->get_turned())

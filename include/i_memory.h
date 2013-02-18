@@ -4,12 +4,12 @@
 #include <vector>
 
 #include "include/memory_state.h"
+#include "include/memory_view.h"
 
 //Interface class for the Memory Engine
 class I_Memory
 {
 public:
-    I_Memory();
     //Set up the game
     virtual bool set_folder_path(std::string folder_path)=0;
     virtual bool set_number_of_cards(int rows, int columns)=0;
@@ -24,8 +24,9 @@ public:
 
     //Playing
     virtual void turn(int row, int column)=0;
-
+    void set_view(Memory_View *view);
 protected:
+    Memory_View *_view;
     Memory_State *_state;
 };
 

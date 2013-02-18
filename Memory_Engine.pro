@@ -10,7 +10,11 @@ SOURCES += main.cpp \
     src/end_turn_state.cpp \
     src/game_over_state.cpp \
     src/memory.cpp \
-    src/memory_card.cpp
+    src/memory_card.cpp \
+    src/card.cpp \
+    src/player.cpp \
+    src/memory_state.cpp \
+    src/memory_view.cpp
 
 HEADERS += \
     include/memory_state.h \
@@ -21,5 +25,8 @@ HEADERS += \
     include/end_turn_state.h \
     include/game_over_state.h \
     include/memory.h \
-    icnlude/memory_card.h
+    icnlude/memory_card.h \
+    include/card.h \
+    include/player.h \
+    include/memory_view.h
 

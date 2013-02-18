@@ -9,6 +9,7 @@ int main()
     I_Memory *game =  new Memory;
     game->add_player("tuxflo");
     game->add_player("anne");
+    game->add_player("vader");
 
 
     if(!game->set_folder_path("./Pictures/txt"))
@@ -17,7 +18,7 @@ int main()
         return -1;
     }
 
-    if(!game->set_number_of_cards(2,2))
+    if(!game->set_number_of_cards(3,2))
     {
         cerr << "Error while setting number of cards!" << endl;
         return -1;
@@ -30,7 +31,7 @@ int main()
     game->turn(0, 0);
     game->turn(1,0);
 
-    game->turn(1,0);
+    game->turn(0,0);
     game->turn(1,1);
 
     game->turn(0, 1);
