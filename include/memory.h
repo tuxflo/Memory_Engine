@@ -8,7 +8,8 @@
 #include <sstream>
 
 #include "include/i_memory.h"
-
+#include "include/player.h"
+#include "include/card.h"
 
 //Implementation of local playing Memory with multiple Players
 class Memory : public I_Memory
@@ -34,6 +35,8 @@ public:
 protected:
 
 private:
+    //Player handeling
+    std::vector<Player> _players;
     //File handeling maybe put this stuff in a shared lib?
     int get_num_files(std::string folder_path, std::string file_extension);
     std::string _folder_path;
@@ -48,6 +51,7 @@ private:
     int _num_cards;
     int _rows;
     int _columns;
+
 };
 
 #endif // MEMORY_H

@@ -112,14 +112,42 @@ void Memory::set_cards()
 
 bool Memory::add_player(std::string name)
 {
+    _players.push_back(Player(name));
+    std::cerr << "Added Player: " << name << std::endl;
+    return true;
 }
 
 bool Memory::remove_player(std::string name)
 {
+    if(_players.empty())
+    {
+        std::cerr << "Could not remove Player because Player list is empty" << std::endl;
+        return false;
+    }
+    for(std::vector<Player>::iterator it = _players.begin(); it != _players.end(); ++it)
+    {
+        if(!name.compare(it->get_name()))
+        {
+            std::cerr << "Removed Player: " << it->get_name() << std::endl;
+            _players.erase(it);
+            return true;
+        }
+    }
+    std::cerr << "Could not find Player " << name << std::endl;
+    return false;
 }
 
 bool Memory::remove_player(int index)
 {
+
+    if(_players.empty())
+    {
+        std::cerr << "Could not remove Player because Player list is empty" << std::endl;
+        return false;
+    }
+    std::cerr << "Removed Player: " << _players.at(index).get_name() << std::endl;
+    _players.erase(_players.begin()+index);
+    return true;
 }
 
 std::vector<std::string> Memory::list_players()

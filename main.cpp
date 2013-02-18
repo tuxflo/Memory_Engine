@@ -7,6 +7,10 @@ using namespace std;
 int main()
 {
     I_Memory *game =  new Memory;
+    game->add_player("tuxflo");
+    game->add_player("anne");
+    game->remove_player("tuxflo");
+    game->remove_player("vader");
     if(!game->set_folder_path("./Pictures/txt"))
     {
         cerr << "Error while setting folder path!" << endl;
