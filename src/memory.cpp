@@ -93,10 +93,53 @@ bool Memory::set_number_of_cards(int rows, int columns)
     return true;
 }
 
+bool Memory::set_number_of_cards(int number)
+{
+    if(!number % 2)
+    {
+        std::cerr << "Error: number of cards is uneven!" << std::endl;
+        return false;
+    }
+
+    if(number > _num_cards)
+    {
+        std::cerr << "Error: not enough cards in the given folder." << std::endl;
+        std::cerr << "Use different folder or set a smaller number of cards." << std::endl;
+        return false;
+    }
+
+
+
+
+    //!!!!!
+    //Test if that works for all valid numbers!!!
+    _rows = (int)sqrt(number)+1;
+    _columns = (int)sqrt(number);
+
+
+
+
+
+    //Just for debugging
+    std::cerr << "Number of cards choosen by player: " << _rows * _columns << std::endl;
+
+    //Set up the 2D Card array
+    _cards = new Card**[_rows];
+    for(int i=0; i<_rows; i++)
+        _cards[i] = new Card*[_columns];
+    return true;
+
+}
+
+int Memory::get_possible_num_cards()
+{
+    return _num_cards;
+}
+
 void Memory::set_cards()
 {
     int count = _rows*_columns;
-    //Array for the filenames numbers (Randomly from 1- number of cards/2)
+    //Array for the filenames numbers (Randomly from 1 to number of cards/2)
     int *filenames = _unique_numbers(count/2, _num_cards);
 
     std::stringstream directory_name;
@@ -105,6 +148,7 @@ void Memory::set_cards()
     {
         directory_name << _folder_path << "/1/" << filenames[i] << "." << _filename_extension;
         cards_array[i] = directory_name.str();
+        std::cerr << directory_name.str() << std::endl;
         directory_name.str("");
     }
     int tmp=0;
@@ -112,32 +156,70 @@ void Memory::set_cards()
     {
         directory_name << _folder_path << "/2/" << filenames[tmp] << "." << _filename_extension;
         cards_array[j] = directory_name.str();
+        std::cerr << directory_name.str() << std::endl;
         directory_name.str("");
         tmp++;
     }
-    cards_array = _shuffle_array(cards_array, count);
+    int *id_array = new int [count];
+    int b=0;
+    for(int a=0; a< count; a++)
+    {
+        if(b==count/2)
+            b=0;
+        id_array[a] = filenames[b];
+        b++;
+    }
+    cards_array = _shuffle_array(cards_array, id_array, count);
+
+    std::cerr << std::endl;
+
+    for(int a=0; a< count; a++)
+        std::cerr << id_array << std::endl;
 
     tmp=0;
     for(int r=0; r<_rows; r++)
     {
         for(int c=0; c<_columns; c++)
         {
-            if(tmp == count/2)
-                tmp = 0;
-            _cards[r][c] = new Card(cards_array[tmp], filenames[tmp]);
+            _cards[r][c] = new Card(cards_array[tmp], id_array[tmp]);
             std::cerr << "Name: " << _cards[r][c]->get_filename() << " ID: " << _cards[r][c]->get_ID() <<  " Turned " << _cards[r][c]->get_turned() <<  std::endl;
             tmp++;
         }
     }
     delete [] filenames;
+    delete [] id_array;
     delete [] cards_array;
+}
+
+Card *Memory::get_card(int row, int column)
+{
+    return _cards[row][column];
+}
+
+int Memory::get_rows()
+{
+    return _rows;
+}
+
+int Memory::get_columns()
+{
+    return _columns;
 }
 
 bool Memory::add_player(std::string name)
 {
-    _players.push_back(Player(name));
+    _players.push_back(new Player(name));
     std::cerr << "Added player: " << name << std::endl;
-    _active_player = &_players.front();
+    _active_player = _players.front();
+    return true;
+}
+
+bool Memory::add_player(Player *player)
+{
+    _players.push_back(player);
+    _active_player = _players.front();
+    std::cerr << "Added player: " << get_active_player()->get_name() << std::endl;
+
     return true;
 }
 
@@ -148,12 +230,13 @@ bool Memory::remove_player(std::string name)
         std::cerr << "Could not remove player because playerlist is empty" << std::endl;
         return false;
     }
-    for(std::vector<Player>::iterator it = _players.begin(); it != _players.end(); ++it)
+    for(std::list<Player*>::iterator it = _players.begin(); it != _players.end(); ++it)
     {
-        if(!name.compare(it->get_name()))
+        if(!name.compare((*it)->get_name()))
         {
-            std::cerr << "Removed player: " << it->get_name() << std::endl;
+            std::cerr << "Removed player: " << (*it)->get_name() << std::endl;
             _players.erase(it);
+            _active_player = _players.front();
             return true;
         }
     }
@@ -169,19 +252,35 @@ bool Memory::remove_player(int index)
         std::cerr << "Could not remove player because playerlist is empty" << std::endl;
         return false;
     }
-    std::cerr << "Removed player: " << _players.at(index).get_name() << std::endl;
-    _players.erase(_players.begin()+index);
+    std::list<Player*>::iterator it = _players.begin();
+    for(int i=0; i< index; i++)
+        ++it;
+
+    _players.erase(it);
+    std::cerr << "Removed player: " << (*it)->get_name() << std::endl;
     return true;
 }
 
 int Memory::get_player_score(int index)
 {
-    return _players.at(index).get_score();
+    std::list<Player*>::iterator it = _players.begin();
+    for(int i=0; i< index; i++)
+        ++it;
+    return (*it)->get_score();
 }
 
 std::string Memory::get_player_name(int index)
 {
-    return _players.at(index).get_name();
+
+    std::list<Player*>::iterator it = _players.begin();
+    for(int i=0; i< index; i++)
+        ++it;
+    return (*it)->get_name();
+}
+
+Player *Memory::get_active_player()
+{
+    return _active_player;
 }
 
 void Memory::turn(int row, int column)
@@ -247,7 +346,7 @@ bool Memory::_check_number(int *array, int array_size, int number)
     }
     return false;
 }
-std::string *Memory::_shuffle_array(std::string *array, int array_size)
+std::string *Memory::_shuffle_array(std::string *array, int *id_array, int array_size)
 {
     for(int i=0;i<array_size-1; i++)
     {
@@ -256,6 +355,9 @@ std::string *Memory::_shuffle_array(std::string *array, int array_size)
         std::string tmp = array[i];
         array[i] = array[c];
         array[c] = tmp;
+        int tmp2 = id_array[i];
+        id_array[i] = id_array[c];
+        id_array[c] = tmp2;
     }
     return array;
 }

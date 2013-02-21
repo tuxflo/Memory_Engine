@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <sstream>
+#include <list>
+#include <math.h>
 
 #include "include/i_memory.h"
 #include "include/player.h"
@@ -28,13 +30,20 @@ public:
     Memory();
     bool set_folder_path(std::string folder_path);
     bool set_number_of_cards(int rows, int columns);
+    bool set_number_of_cards(int number);
+    int get_possible_num_cards();
     void set_cards();
+    Card *get_card(int row, int column);
+    int get_rows();
+    int get_columns();
 
     bool add_player(std::string name);
+    bool add_player(Player *player);
     bool remove_player(std::string name);
     bool remove_player(int index);
     int get_player_score(int index);
     std::string get_player_name(int index);
+    Player *get_active_player();
 
     void turn(int row, int column);
 
@@ -45,7 +54,7 @@ protected:
 
 private:
     //Player handeling
-    std::vector<Player> _players;
+    std::list<Player*> _players;
     Player *_active_player;
     //File handeling maybe put this stuff in a shared lib?
     int get_num_files(std::string folder_path, std::string file_extension);
@@ -56,7 +65,7 @@ private:
     bool _check_number(int *array, int array_size, int number);
 
     int _get_num_files(std::string folder_path, std::string file_extension);
-    std::string *_shuffle_array(std::string *array, int array_size);
+    std::string *_shuffle_array(std::string *array, int *id_array, int array_size);
     //Maximum number of cards in given directory
     int _num_cards;
     int _rows;

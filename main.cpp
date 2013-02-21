@@ -12,13 +12,13 @@ int main()
     game->add_player("vader");
 
 
-    if(!game->set_folder_path("./Pictures/txt"))
+    if(!game->set_folder_path("/home/tuxflo/workspace/Memory_Qt_GUI/Pictures/Capitols_of_Latin_America/svg"))
     {
         cerr << "Error while setting folder path!" << endl;
         return -1;
     }
 
-    if(!game->set_number_of_cards(3,2))
+    if(!game->set_number_of_cards(2,2))
     {
         cerr << "Error while setting number of cards!" << endl;
         return -1;

@@ -10,7 +10,6 @@ SOURCES += main.cpp \
     src/end_turn_state.cpp \
     src/game_over_state.cpp \
     src/memory.cpp \
-    src/memory_card.cpp \
     src/card.cpp \
     src/player.cpp \
     src/memory_state.cpp \

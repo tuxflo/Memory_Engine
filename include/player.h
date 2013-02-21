@@ -8,6 +8,7 @@ class Player
 public:
     Player();
     Player(std::string name);
+    virtual ~Player(){}
 
     void set_name(std::string name);
     std::string get_name();
