@@ -31,7 +31,11 @@ bool Memory::set_folder_path(std::string folder_path)
     {
         file = ent->d_name;
         if(cover_string.compare(file) == 0)
+        {
             cover = true;
+            _cover = folder_path + "/" + cover_string;
+
+        }
     }
     closedir(dir);
     if(!cover)
@@ -73,7 +77,7 @@ bool Memory::set_number_of_cards(int rows, int columns)
         return false;
     }
 
-    if((rows * columns) > _num_cards)
+    if((rows * columns) > _num_cards*2)
     {
         std::cerr << "Error: not enough cards in the given folder." << std::endl;
         std::cerr << "Use different folder or set a smaller number of cards." << std::endl;
@@ -101,7 +105,7 @@ bool Memory::set_number_of_cards(int number)
         return false;
     }
 
-    if(number > _num_cards)
+    if(number > _num_cards*2)
     {
         std::cerr << "Error: not enough cards in the given folder." << std::endl;
         std::cerr << "Use different folder or set a smaller number of cards." << std::endl;
@@ -113,7 +117,7 @@ bool Memory::set_number_of_cards(int number)
 
     //!!!!!
     //Test if that works for all valid numbers!!!
-    _rows = (int)sqrt(number)+1;
+    _rows = (int)sqrt(number);
     _columns = (int)sqrt(number);
 
 
@@ -133,11 +137,13 @@ bool Memory::set_number_of_cards(int number)
 
 int Memory::get_possible_num_cards()
 {
-    return _num_cards;
+    return _num_cards*2;
 }
 
 void Memory::set_cards()
 {
+    //Still not the best solution to set up the cards and id's but it works for me now...
+
     int count = _rows*_columns;
     //Array for the filenames numbers (Randomly from 1 to number of cards/2)
     int *filenames = _unique_numbers(count/2, _num_cards);
@@ -160,35 +166,19 @@ void Memory::set_cards()
         directory_name.str("");
         tmp++;
     }
-    int *id_array = new int [count];
-    int b=0;
-    for(int a=0; a< count; a++)
-    {
-        if(b==count/2)
-            b=0;
-        id_array[a] = filenames[b];
-        b++;
-    }
-    cards_array = _shuffle_array(cards_array, id_array, count);
-
-    std::cerr << std::endl;
-
-    for(int a=0; a< count; a++)
-        std::cerr << id_array << std::endl;
-
     tmp=0;
     for(int r=0; r<_rows; r++)
     {
         for(int c=0; c<_columns; c++)
         {
-            _cards[r][c] = new Card(cards_array[tmp], id_array[tmp]);
-            std::cerr << "Name: " << _cards[r][c]->get_filename() << " ID: " << _cards[r][c]->get_ID() <<  " Turned " << _cards[r][c]->get_turned() <<  std::endl;
+            int id = atoi(cards_array[tmp].substr(cards_array[tmp].length()-5, 1).c_str());
+            _cards[r][c] = new Card(cards_array[tmp], id);
+            //std::cerr << "Name: " << _cards[r][c]->get_filename() << " ID: " << _cards[r][c]->get_ID() <<  " Turned " << _cards[r][c]->get_turned() <<  std::endl;
             tmp++;
         }
     }
-    delete [] filenames;
-    delete [] id_array;
-    delete [] cards_array;
+    std::srand(time(NULL));
+    std::random_shuffle(_cards[0][0], _cards[0][0] + sizeof(_cards)/sizeof(_cards[0][0]));
 }
 
 Card *Memory::get_card(int row, int column)
@@ -204,6 +194,11 @@ int Memory::get_rows()
 int Memory::get_columns()
 {
     return _columns;
+}
+
+std::string Memory::get_cover() const
+{
+    return _cover;
 }
 
 bool Memory::add_player(std::string name)
@@ -345,19 +340,4 @@ bool Memory::_check_number(int *array, int array_size, int number)
             return true;
     }
     return false;
-}
-std::string *Memory::_shuffle_array(std::string *array, int *id_array, int array_size)
-{
-    for(int i=0;i<array_size-1; i++)
-    {
-        int c = i +(rand() % (array_size-i));
-        //Swap values
-        std::string tmp = array[i];
-        array[i] = array[c];
-        array[c] = tmp;
-        int tmp2 = id_array[i];
-        id_array[i] = id_array[c];
-        id_array[c] = tmp2;
-    }
-    return array;
 }

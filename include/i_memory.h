@@ -18,6 +18,7 @@ public:
     virtual bool set_number_of_cards(int number)=0;
     virtual void set_cards()=0;
     virtual Card* get_card(int row, int column)=0;
+    virtual std::string get_cover() const =0;
     virtual int get_possible_num_cards()=0;
     virtual int get_rows()=0;
     virtual int get_columns()=0;

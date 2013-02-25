@@ -36,6 +36,7 @@ public:
     Card *get_card(int row, int column);
     int get_rows();
     int get_columns();
+    std::string get_cover() const;
 
     bool add_player(std::string name);
     bool add_player(Player *player);
@@ -65,11 +66,12 @@ private:
     bool _check_number(int *array, int array_size, int number);
 
     int _get_num_files(std::string folder_path, std::string file_extension);
-    std::string *_shuffle_array(std::string *array, int *id_array, int array_size);
+
     //Maximum number of cards in given directory
-    int _num_cards;
+    int _num_cards; //Attention the cards availible for playing is _num_cards * 2
     int _rows;
     int _columns;
+    std::string _cover;
 
     //States
     First_Card_State _first_card_state;
