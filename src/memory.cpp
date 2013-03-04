@@ -5,10 +5,19 @@ Memory::Memory() :
     _first_card_state(this),
     _second_card_state(this),
     _end_turn_state(this),
-    _game_over_state(this)
+    _game_over_state(this),
+    _game_over(false),
+    _recieved_points(0)
 {
     _state = &_first_card_state;
 
+}
+
+Memory::~Memory()
+{
+    std::cerr << "Memory Destructor" << std::endl;
+    for(int i=0; i<_players.size(); i++)
+        delete _players.at(i);
 }
 
 bool Memory::set_folder_path(std::string folder_path)
@@ -48,13 +57,13 @@ bool Memory::set_folder_path(std::string folder_path)
 
     //Check the subfolders
     folder_path.append("/1");
-    int first = _get_num_files(folder_path, _filename_extension);
+    int first = _get_num_files(folder_path.c_str(), _filename_extension);
     if(!first)
     {
         return false;
     }
     folder_path.replace(folder_path.length()-1, 1, "2");
-    int second = _get_num_files(folder_path, _filename_extension);
+    int second = _get_num_files(folder_path.c_str(), _filename_extension);
     if(!second)
     {
         return false;
@@ -87,13 +96,9 @@ bool Memory::set_number_of_cards(int rows, int columns)
     _rows = rows;
     _columns = columns;
 
+
     //Just for debugging
     std::cerr << "Number of cards choosen by player: " << _rows * _columns << std::endl;
-
-    //Set up the 2D Card array
-    _cards = new Card**[_rows];
-    for(int i=0; i<_rows; i++)
-        _cards[i] = new Card*[_columns];
     return true;
 }
 
@@ -117,20 +122,12 @@ bool Memory::set_number_of_cards(int number)
 
     //!!!!!
     //Test if that works for all valid numbers!!!
-    _rows = (int)sqrt(number);
-    _columns = (int)sqrt(number);
-
-
-
+    _rows = sqrt(number);
+    _columns = sqrt(number);
 
 
     //Just for debugging
     std::cerr << "Number of cards choosen by player: " << _rows * _columns << std::endl;
-
-    //Set up the 2D Card array
-    _cards = new Card**[_rows];
-    for(int i=0; i<_rows; i++)
-        _cards[i] = new Card*[_columns];
     return true;
 
 }
@@ -143,7 +140,6 @@ int Memory::get_possible_num_cards()
 void Memory::set_cards()
 {
     //Still not the best solution to set up the cards and id's but it works for me now...
-
     int count = _rows*_columns;
     //Array for the filenames numbers (Randomly from 1 to number of cards/2)
     int *filenames = _unique_numbers(count/2, _num_cards);
@@ -167,23 +163,25 @@ void Memory::set_cards()
         tmp++;
     }
     tmp=0;
-    for(int r=0; r<_rows; r++)
+    cards.reserve(count);
+    for(int z=0;z<count; z++)
     {
-        for(int c=0; c<_columns; c++)
-        {
-            int id = atoi(cards_array[tmp].substr(cards_array[tmp].length()-5, 1).c_str());
-            _cards[r][c] = new Card(cards_array[tmp], id);
-            //std::cerr << "Name: " << _cards[r][c]->get_filename() << " ID: " << _cards[r][c]->get_ID() <<  " Turned " << _cards[r][c]->get_turned() <<  std::endl;
-            tmp++;
-        }
+        cards.push_back(Card());
+        int id = atoi(cards_array[tmp].substr(cards_array[tmp].length()-5, 1).c_str());;
+        cards.at(tmp).set_filename(cards_array[tmp]);
+        cards.at(tmp).set_ID(id);
+        tmp++;
     }
     std::srand(time(NULL));
-    std::random_shuffle(_cards[0][0], _cards[0][0] + sizeof(_cards)/sizeof(_cards[0][0]));
+    std::random_shuffle(cards.begin(), cards.end());
+
+    delete [] filenames;
+    delete [] cards_array;
 }
 
-Card *Memory::get_card(int row, int column)
+Card *Memory::get_card(int index)
 {
-    return _cards[row][column];
+    return &cards[index];
 }
 
 int Memory::get_rows()
@@ -206,6 +204,7 @@ bool Memory::add_player(std::string name)
     _players.push_back(new Player(name));
     std::cerr << "Added player: " << name << std::endl;
     _active_player = _players.front();
+    _current_player_index = 0;
     return true;
 }
 
@@ -213,8 +212,8 @@ bool Memory::add_player(Player *player)
 {
     _players.push_back(player);
     _active_player = _players.front();
-    std::cerr << "Added player: " << get_active_player()->get_name() << std::endl;
-
+    std::cerr << "Added player: " << player->get_name() << std::endl;
+    _current_player_index = 0;
     return true;
 }
 
@@ -225,7 +224,7 @@ bool Memory::remove_player(std::string name)
         std::cerr << "Could not remove player because playerlist is empty" << std::endl;
         return false;
     }
-    for(std::list<Player*>::iterator it = _players.begin(); it != _players.end(); ++it)
+    for(std::vector<Player*>::iterator it = _players.begin(); it != _players.end(); ++it)
     {
         if(!name.compare((*it)->get_name()))
         {
@@ -247,7 +246,7 @@ bool Memory::remove_player(int index)
         std::cerr << "Could not remove player because playerlist is empty" << std::endl;
         return false;
     }
-    std::list<Player*>::iterator it = _players.begin();
+    std::vector<Player*>::iterator it = _players.begin();
     for(int i=0; i< index; i++)
         ++it;
 
@@ -258,19 +257,12 @@ bool Memory::remove_player(int index)
 
 int Memory::get_player_score(int index)
 {
-    std::list<Player*>::iterator it = _players.begin();
-    for(int i=0; i< index; i++)
-        ++it;
-    return (*it)->get_score();
+    return _players.at(index)->get_score();
 }
 
 std::string Memory::get_player_name(int index)
 {
-
-    std::list<Player*>::iterator it = _players.begin();
-    for(int i=0; i< index; i++)
-        ++it;
-    return (*it)->get_name();
+    return _players.at(index)->get_name();
 }
 
 Player *Memory::get_active_player()
@@ -278,19 +270,44 @@ Player *Memory::get_active_player()
     return _active_player;
 }
 
+Player *Memory::get_player_at(int index)
+{
+    return _players.at(index);
+}
+
+int Memory::get_num_of_players()
+{
+    return _players.size();
+}
+
 void Memory::turn(int row, int column)
 {
     _state->turn(row, column);
 }
 
-int Memory::_get_num_files(std::string folder_path, std::string file_extension)
+bool Memory::get_turned(int row, int column)
+{
+    return cards[row * _rows + column].get_turned();
+}
+
+int Memory::get_recieved_points()
+{
+    return _recieved_points;
+}
+
+bool Memory::get_game_over()
+{
+    return _game_over;
+}
+
+int Memory::_get_num_files(const char *folder_path, const std::string& file_extension)
 {
     DIR *dir;
     struct dirent *ent;
     int tmp = 0;
     std::string file;
 
-    if ((dir = opendir (folder_path.c_str())) == NULL)
+    if ((dir = opendir (folder_path)) == NULL)
     {
         std::cerr << "Error: Folder " << folder_path << " does not exist!" << std::endl;
         return 0;
@@ -304,6 +321,7 @@ int Memory::_get_num_files(std::string folder_path, std::string file_extension)
             tmp++;
         }
     }
+    closedir(dir);
     if(!tmp)
     {
         std::cerr << "Error: Folder " << folder_path << " is empty!" << std::endl;

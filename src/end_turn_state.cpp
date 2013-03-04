@@ -8,7 +8,7 @@ End_Turn_State::End_Turn_State(Memory *memory) :
 
 void End_Turn_State::turn(int row, int column)
 {
-    std::cerr << "In End_Turn_state" << std::endl;
+    std::cerr << "In End_Turn_state" << "row: " << row << "column: "<< column << std::endl;
     //Check if the cards match
     if(_memory->_first_card->get_ID() == _memory->_second_card->get_ID())
     {
@@ -16,6 +16,8 @@ void End_Turn_State::turn(int row, int column)
         std::cerr << std::endl << "Cards Match!" << std::endl << std::endl;
         _memory->_active_player->add_points(_memory->_first_card->get_points());
         _memory->_active_player->add_points(_memory->_second_card->get_points());
+        _memory->_recieved_points = _memory->_first_card->get_points() + _memory->_second_card->get_points();
+        std::cerr << "Player: " << _memory->_active_player->get_name() << " recieved " << _memory->_first_card->get_points() + _memory->_second_card->get_points() << " points" << std::endl;
 
         if(check_game_over())
         {
@@ -23,7 +25,6 @@ void End_Turn_State::turn(int row, int column)
             _memory->_state = &_memory->_game_over_state;
             _memory->turn(0, 0);
         }
-
 
     }
     else
@@ -34,19 +35,14 @@ void End_Turn_State::turn(int row, int column)
 
         _memory->_first_card->set_turned(false);
         _memory->_second_card->set_turned(false);
-
-        //Find the next player and set him/her active
-        if(_memory->_players.size() == 1)
-            _memory->_active_player = _memory->_players.front();
-        else
-        {
-
-            std::list<Player*>::iterator it = _memory->_players.begin();
-            ++it;
-            _memory->_active_player = (*it);
-
-        }
+        _memory->_recieved_points = 0;
      }
+    //Find the next player and set him/her active
+    if((int)_memory->_players.size()-1 == _memory->_current_player_index)
+        _memory->_current_player_index = 0;
+    else
+        _memory->_current_player_index++;
+    _memory->_active_player = _memory->_players.at(_memory->_current_player_index);
     _memory->_state = &_memory->_first_card_state;
 }
 
@@ -54,15 +50,12 @@ bool End_Turn_State::check_game_over()
 {
     //Check if all cards are turned
     int tmp = 0;
-    for(int i=0; i< _memory->_rows; i++)
+    for(int i=0; i< _memory->_rows* _memory->_columns; i++)
     {
-        for(int j=0; j<_memory->_columns;j++)
-        {
-            if(_memory->_cards[i][j]->get_turned())
-                tmp++;
-        }
+        if(_memory->cards[i].get_turned())
+            tmp++;
     }
-    if(tmp == _memory->_rows* _memory->_columns)
+    if(tmp == _memory->_rows * _memory->_columns)
         return true;
     return false;
 }

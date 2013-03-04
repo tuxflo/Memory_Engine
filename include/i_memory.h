@@ -12,12 +12,13 @@
 class I_Memory
 {
 public:
+    virtual ~I_Memory(){}
     //Set up the game
     virtual bool set_folder_path(std::string folder_path)=0;
     virtual bool set_number_of_cards(int rows, int columns)=0;
     virtual bool set_number_of_cards(int number)=0;
     virtual void set_cards()=0;
-    virtual Card* get_card(int row, int column)=0;
+    virtual Card* get_card(int index)=0;
     virtual std::string get_cover() const =0;
     virtual int get_possible_num_cards()=0;
     virtual int get_rows()=0;
@@ -31,10 +32,17 @@ public:
     virtual int get_player_score(int index)=0;
     virtual Player *get_active_player()=0;
     virtual std::string get_player_name(int index)=0;
+    virtual Player *get_player_at(int index)=0;
+    virtual int get_num_of_players()=0;
 
     //Playing
     virtual void turn(int row, int column)=0;
     void set_view(Memory_View *view);
+    virtual bool get_turned(int row, int column)=0;
+    virtual int get_recieved_points()=0;
+
+    //Ending the game
+    virtual bool get_game_over()=0;
 protected:
     Memory_View *_view;
     Memory_State *_state;
