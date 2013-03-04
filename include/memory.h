@@ -13,8 +13,6 @@
 #include "include/player.h"
 #include "include/card.h"
 
-#include "include/twod_array.h"
-
 #include "include/first_card_state.h"
 #include "include/second_card_state.h"
 #include "include/end_turn_state.h"
